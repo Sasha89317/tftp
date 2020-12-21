@@ -126,7 +126,7 @@ class Tftp(object):
 
             # режим всегда кодируется ascii
             self.tftp = str(input_packet[seperator_idx + 1:-1], 'ascii').lower()
-            # print(self.tftp_mode)
+            #print(self.tftp_mode)
 
         if packet_type == Tftp.TftpPacketType.ACK and self.sent_last:  # последний пакет подтвержден
 
@@ -157,7 +157,7 @@ class Tftp(object):
 
             out_packet = struct.pack('!HH', Tftp.TftpPacketType.ACK.value, 0)
         elif packet_type == Tftp.TftpPacketType.DATA:  # Data
-            # print('in',input_packet)
+            print('in',input_packet)
             block_num = struct.unpack('!H', input_packet[2:4])[0]
 
             if len(input_packet) > 4:  # последний пакет данных может иметь 0 байтов
@@ -211,7 +211,7 @@ class Tftp(object):
                     out_packet += struct.pack(format_char, byte)
             else:  # if file size %512 == 0 тогда последний пакет данных не будет иметь блоков данных
                 out_packet = struct.pack('!HH', Tftp.TftpPacketType.DATA.value, block_num)
-            # print('outdata:',out_packet)
+            #print('outdata:',out_packet)
         return out_packet
 
     def ignore_current(self):
@@ -227,7 +227,7 @@ class Tftp(object):
             self.sent_last = True
             # self.reached_end = True
             return self.file_bytes[start_idx:]
-        elif end_idx == self.file_block_count:  # отправить пустой блок данных в конце (конец передачи), если размер файла кратен 512
+        elif end_idx == self.file_block_count and self.sent_last == True:  # отправить пустой блок данных в конце (конец передачи), если размер файла кратен 512
             self.sent_last = True
             return []
         return self.file_bytes[start_idx: end_idx]
@@ -295,7 +295,6 @@ def setup_sockets(address):
     return my_socket
 
 
-
 def get_arg(param_index, default=None):
     """
     Получает аргумент командной строки по индексу (примечание: индекс начинается с 1)
@@ -346,7 +345,7 @@ def main():
                 if not tftp_proc.transmission_ended():  # получить следующий пакет, если не дошли до конца передачи
 
                     received_packet, received_client = s.recvfrom(2048)
-                    # print('PROCESSING')
+                    #print('PROCESSING')
                     tftp_proc.process_udp_packet(received_packet, received_client)
 
 
@@ -366,7 +365,7 @@ def main():
 
         else:
             print('ERROR!')
-        
+
         time.sleep(1)
 
 if __name__ == '__main__':
